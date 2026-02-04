@@ -1,20 +1,19 @@
+import tensorflow as tf
 import matplotlib.pyplot as plt
-import numpy as np
-from transformer_model import TransformerBlock
+from preprocess import load_and_preprocess
 
 
-def plot_attention(model, X_sample):
-    for layer in model.layers:
-        if isinstance(layer, TransformerBlock):
-            _, scores = layer(X_sample, return_attention=True)
-            attn = scores[0].numpy()
-            plt.imshow(attn.mean(axis=0))
-            plt.colorbar()
-            plt.title("Attention Heatmap")
-            plt.xlabel("Input Time Step")
-            plt.ylabel("Input Time Step")
-            plt.show()
-            break
+X_train, X_test, y_train, y_test, _ = load_and_preprocess()
+model = tf.keras.models.load_model("transformer_model.keras", compile=False)
 
-plot_attention(transformer_model, X_test[:1])
+sample = X_test[:1]
+_ = model(sample)
 
+scores = model.attention_scores.numpy()[0].mean(axis=0)
+
+plt.imshow(scores)
+plt.colorbar()
+plt.title("Attention Heatmap")
+plt.xlabel("Time Step")
+plt.ylabel("Time Step")
+plt.show()
